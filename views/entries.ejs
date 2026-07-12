@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+<head>
+    <title>Entries</title>
+</head>
+<body>
+    <h1>My Notes</h1>
+
+    <ul>
+        <% entries.forEach(entry => { %>
+            <li><%= entry.title %></li>
+        <% }) %>
+    </ul>
+</body>
+</html>
