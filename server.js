@@ -9,8 +9,10 @@ app.set('views', 'views');
 
 const PORT = process.env.PORT || 3000;
 
+app.use(express.json());
 app.use('/', pagesRouter);
 app.use('/api', apiRouter);
+app.use(express.static('public'));
 
 app.get("/about", (req, res) => {
   res.render("about", { title: "About" });
