@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { readFile } from 'fs/promises';
 
 const router = Router();
 
@@ -10,34 +11,16 @@ router.get('/about', (req, res) => {
   res.render('about');
 });
 
-const entries = [
-  {
-    title: 'First note',
-    body: 'This is the first note.'
-  },
-  {
-    title: 'Second note',
-    body: 'This is the second note.'
-  },
-  {
-    title: 'Third note',
-    body: 'This is the third note.'
-  }
-];
+router.get('/entries', async (req, res) => {
+  const data = await readFile('entries.json', 'utf-8');
+  const entries = JSON.parse(data);
 
-router.post('/entries', (req, res) => {
-  const { title, body } = req.body;
-  const newEntry = {
-    title,
-    body
-  };
-
-  entries.push(newEntry);
-  res.status(201).json(newEntry);
-});
-
-router.get('/entries', (req, res) => {
-  res.render('entries', { entries });
+  res.set('Cache-Control', 'public, max-age=60');
+  res.set('X-Total-Count', entries.length);
+  res.status(200).render('entries', {
+    title: 'My Notes',
+    entries
+  });
 });
 
 export default router;
