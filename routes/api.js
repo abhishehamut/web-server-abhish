@@ -53,10 +53,11 @@ router.delete('/entries/:id', async (req, res) => {
   }
   const deletedEntry = entries.splice(id, 1);
   await saveEntries(entries);
-  res.status(200).json({
-    message: 'Entry deleted',
-    entry: deletedEntry[0]
-  });
+  res.sendStatus(204);
+  //res.status(200).json({
+  //  message: 'Entry deleted',
+  //  entry: deletedEntry[0]
+  //});
 });
 
 router.get('/three-posts', async (req, res) => {
