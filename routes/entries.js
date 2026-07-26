@@ -52,6 +52,28 @@ router.post('/classic', async (req, res) => {
   res.redirect('/entries');
 });
 
+router.put('/:id', async (req, res) => {
+  const id = parseInt(req.params.id);
+  const data = await readFile(DATA_FILE, 'utf-8');
+  const entries = JSON.parse(data);
+
+  const found = findEntryById(entries, id);
+  if (!found.some) {
+    res.status(404).json({ error: 'Entry not found' });
+    return;
+  }
+
+  const result = validateEntry(req.body);
+  if (!result.ok) {
+    res.status(400).json({ error: result.error });
+    return;
+  }
+
+  entries[id] = result.value;
+  await writeFile(DATA_FILE, JSON.stringify(entries, null, 2));
+  res.status(200).json(result.value);
+});
+
 router.delete('/:id', async (req, res) => {
   const id = parseInt(req.params.id);
   const data = await readFile(DATA_FILE, 'utf-8');
