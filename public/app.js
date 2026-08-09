@@ -1,5 +1,6 @@
 const form = document.querySelector('#entry-form');
 const list = document.querySelector('#entries');
+const announcer = document.querySelector('#status-announcer');
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
@@ -26,7 +27,7 @@ form.addEventListener('submit', async (event) => {
   item.dataset.title = saved.title;
   item.dataset.body = saved.body;
   item.dataset.favorite = saved.favorite;
-  item.innerHTML = `<span class="entry-display"><strong>${saved.title}:</strong> ${saved.body}</span><button class="favorite-btn" type="button">${saved.favorite ? '★' : '☆'}</button><button class="edit-btn" type="button">Edit</button><button class="delete-btn" hx-delete="/entries/${saved.id}" hx-target="closest li" hx-swap="outerHTML" hx-confirm="Delete this entry?">Delete</button>`;
+  item.innerHTML = `<span class="entry-display"><strong>${saved.title}:</strong> ${saved.body}</span><button class="favorite-btn" type="button" aria-label="Add to favorites">${saved.favorite ? '★' : '☆'}</button><button class="edit-btn hover:bg-teal-50" type="button">Edit</button><button class="delete-btn hover:bg-red-50" hx-delete="/entries/${saved.id}" hx-target="closest li" hx-swap="outerHTML" hx-confirm="Delete this entry?" hx-indicator="next .delete-indicator">Delete</button><span class="delete-indicator htmx-indicator">Deleting...</span>`;
   list.append(item);
   htmx.process(item);
 
@@ -38,12 +39,12 @@ const startEdit = (item) => {
   const buttons = item.querySelectorAll('.edit-btn, .delete-btn');
 
   const editForm = document.createElement('form');
-  editForm.className = 'edit-form';
+  editForm.className = 'edit-form flex flex-col gap-2 flex-1 sm:flex-row';
   editForm.innerHTML = `
-    <input type="text" name="title" value="${item.dataset.title}">
-    <input type="text" name="body" value="${item.dataset.body}">
-    <button type="submit">Save</button>
-    <button type="button" class="cancel-btn">Cancel</button>
+    <input type="text" name="title" value="${item.dataset.title}" class="form-input">
+    <input type="text" name="body" value="${item.dataset.body}" class="form-input">
+    <button type="submit" class="bg-teal-700 text-white rounded px-3 py-1.5">Save</button>
+    <button type="button" class="cancel-btn bg-gray-500 text-white rounded px-3 py-1.5">Cancel</button>
   `;
 
   display.replaceWith(editForm);
@@ -98,4 +99,17 @@ list.addEventListener('click', async (event) => {
   const saved = await response.json();
   item.dataset.favorite = saved.favorite;
   button.textContent = saved.favorite ? '★' : '☆';
+  button.setAttribute('aria-label', saved.favorite ? 'Remove from favorites' : 'Add to favorites');
+});
+
+list.addEventListener('htmx:beforeSwap', () => {
+  announcer.textContent = 'Entry deleted.';
+  list.focus();
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.altKey && event.shiftKey && event.key.toLowerCase() === 'n') {
+    event.preventDefault();
+    document.querySelector('#entry-title').focus();
+  }
 });
